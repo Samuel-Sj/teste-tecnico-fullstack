@@ -1,122 +1,77 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import Header from './components/Header';
+import KpiCards from './components/KpiCards';
+import StatusChart from './components/StatusChart';
+import MonthlyChart from './components/MonthlyCharts';
+import FiltersBar from './components/FiltersBar';
+import AtendimentosTable from './components/AtendimentosTable';
+import Pagination from './components/Pagination';
+import ExportButtons from './components/ExportButtons';
+import { useAtendimentos } from './hooks/useAtendimentos';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const {
+    filtros,
+    termoBusca,
+    setTermoBusca,
+    atualizarFiltro,
+    limparFiltros,
+    filtrosAtivos,
+    opcoesFiltro,
+    page,
+    setPage,
+    atendimentos,
+    pagination,
+    loading,
+    error,
+    stats,
+    statsLoading,
+    statsError,
+  } = useAtendimentos();
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app">
+      <Header />
 
-      <div className="ticks"></div>
+      <main className="app-main">
+        <KpiCards stats={stats} loading={statsLoading} error={statsError} />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        <section aria-label="Gráficos">
+          <h2 className="section-title">Análises</h2>
+          <div className="charts-grid">
+            <StatusChart stats={stats} loading={statsLoading} error={statsError} />
+            <MonthlyChart stats={stats} loading={statsLoading} error={statsError} />
+          </div>
+        </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        <section aria-label="Agendamentos">
+          <h2 className="section-title">Agendamentos</h2>
+
+          <FiltersBar
+            filtros={filtros}
+            termoBusca={termoBusca}
+            setTermoBusca={setTermoBusca}
+            atualizarFiltro={atualizarFiltro}
+            limparFiltros={limparFiltros}
+            opcoesFiltro={opcoesFiltro}
+            filtrosAtivos={filtrosAtivos}
+          />
+
+          <div className="table-section" style={{ marginTop: 16 }}>
+            <div className="table-section__header">
+              <h3 className="section-title">Resultados</h3>
+              <ExportButtons filtros={filtros} totalFiltrado={pagination.total} />
+            </div>
+
+            <AtendimentosTable atendimentos={atendimentos} loading={loading} error={error} />
+
+            <Pagination pagination={pagination} page={page} setPage={setPage} />
+          </div>
+        </section>
+      </main>
+
+      <footer className="app-footer">
+        Painel interno de atendimentos · dados de demonstração
+      </footer>
+    </div>
+  );
 }
-
-export default App
