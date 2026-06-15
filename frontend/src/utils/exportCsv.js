@@ -1,12 +1,12 @@
 const COLUNAS = [
-  { chave: 'cliente', titulo: 'Cliente' },
+  { chave: 'nome', titulo: 'Cliente' },
+  { chave: 'cpf', titulo: 'CPF' },
   { chave: 'data', titulo: 'Data' },
   { chave: 'horaInicio', titulo: 'Hora início' },
   { chave: 'horaFim', titulo: 'Hora fim' },
-  { chave: 'advogado', titulo: 'Advogado(a)' },
-  { chave: 'areaJuridica', titulo: 'Área / órgão' },
+  { chave: 'responsavel', titulo: 'Responsável' },
+  { chave: 'organizacao', titulo: 'Organização' },
   { chave: 'status', titulo: 'Status' },
-  { chave: 'valor', titulo: 'Valor (R$)' },
 ];
 
 function escaparCampoCsv(valor) {
@@ -24,7 +24,7 @@ function escaparCampoCsv(valor) {
 export function exportarCsv(atendimentos, nomeArquivo = 'atendimentos.csv') {
   const cabecalho = COLUNAS.map((c) => c.titulo).join(';');
   const linhas = atendimentos.map((a) =>
-    COLUNAS.map((c) => escaparCampoCsv(c.chave === 'valor' ? a.valor.toFixed(2).replace('.', ',') : a[c.chave])).join(';')
+    COLUNAS.map((c) => escaparCampoCsv(a[c.chave])).join(';')
   );
 
   const conteudo = [cabecalho, ...linhas].join('\r\n');
@@ -40,4 +40,3 @@ export function exportarCsv(atendimentos, nomeArquivo = 'atendimentos.csv') {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
-

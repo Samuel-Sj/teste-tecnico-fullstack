@@ -1,14 +1,15 @@
 const formatadorNumero = new Intl.NumberFormat('pt-BR');
-const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
+const formatadorPercentual = new Intl.NumberFormat('pt-BR', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
 });
 
 const CARDS = [
   { chave: 'totalAtendimentos', label: 'Total de Atendimentos', tab: 'Total', variante: 'total', formato: 'numero' },
   { chave: 'totalConcluidos', label: 'Total Concluídos', tab: 'Concluído', variante: 'concluido', formato: 'numero' },
   { chave: 'totalCancelados', label: 'Total Cancelados', tab: 'Cancelado', variante: 'cancelado', formato: 'numero' },
-  { chave: 'receitaTotal', label: 'Receita Total (estimada)', tab: 'Receita', variante: 'receita', formato: 'moeda' },
+  { chave: 'taxaConclusao', label: 'Taxa de Conclusão', tab: 'Conclusão', variante: 'receita', formato: 'percentual' },
 ];
 
 export default function KpiCards({ stats, loading, error }) {
@@ -26,8 +27,8 @@ export default function KpiCards({ stats, loading, error }) {
               <div className="kpi-card__value">
                 {loading || !stats ? (
                   <span className="skeleton-bar" style={{ width: '70%', display: 'inline-block', height: '1.6rem' }} />
-                ) : card.formato === 'moeda' ? (
-                  formatadorMoeda.format(stats[card.chave])
+                ) : card.formato === 'percentual' ? (
+                  formatadorPercentual.format(stats[card.chave])
                 ) : (
                   formatadorNumero.format(stats[card.chave])
                 )}

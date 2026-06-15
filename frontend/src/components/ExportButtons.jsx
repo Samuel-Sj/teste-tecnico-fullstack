@@ -1,13 +1,12 @@
 import { useState } from 'react';
-import { fetchAtendimentosParaExportacao } from '../services/api';
 import { exportarCsv } from '../utils/exportCsv';
 import { exportarPdf } from '../utils/exportPdf';
 
 const LABELS_FILTRO = {
-  search: 'busca',
+  search: 'nome/CPF',
   status: 'status',
-  areaJuridica: 'área/órgão',
-  advogado: 'advogado(a)',
+  organizacao: 'organização',
+  responsavel: 'responsável',
   dataInicio: 'a partir de',
   dataFim: 'até',
 };
@@ -19,23 +18,28 @@ function resumoFiltros(filtros) {
   return partes.length ? partes.join(', ') : 'nenhum (todos os atendimentos)';
 }
 
-export default function ExportButtons({ filtros, totalFiltrado }) {
+/**
+ * Exporta exatamente os registros já carregados em `dados`, que
+ * correspondem aos filtros/busca ativos no momento (ver useAtendimentos).
+ */
+export default function ExportButtons({ filtros, dados, carregando }) {
   const [exportando, setExportando] = useState(null); // 'csv' | 'pdf' | null
   const [erro, setErro] = useState(null);
 
-  async function handleExport(tipo) {
-    setExportando(tipo);
+  function handleExport(tipo) {
     setErro(null);
+
+    if (!dados || dados.length === 0) {
+      setErro('Nenhum registro para exportar com os filtros atuais.');
+      return;
+    }
+
+    setExportando(tipo);
     try {
-      const res = await fetchAtendimentosParaExportacao(filtros);
-      if (res.data.length === 0) {
-        setErro('Nenhum registro para exportar com os filtros atuais.');
-        return;
-      }
       if (tipo === 'csv') {
-        exportarCsv(res.data, 'atendimentos.csv');
+        exportarCsv(dados, 'atendimentos.csv');
       } else {
-        exportarPdf(res.data, resumoFiltros(filtros), 'atendimentos.pdf');
+        exportarPdf(dados, resumoFiltros(filtros), 'atendimentos.pdf');
       }
     } catch {
       setErro('Falha ao exportar os dados. Tente novamente.');
@@ -44,13 +48,15 @@ export default function ExportButtons({ filtros, totalFiltrado }) {
     }
   }
 
+  const desabilitado = carregando || exportando !== null || !dados || dados.length === 0;
+
   return (
     <div className="table-actions">
       <button
         type="button"
         className="btn btn-outline-teal"
         onClick={() => handleExport('csv')}
-        disabled={exportando !== null || totalFiltrado === 0}
+        disabled={desabilitado}
       >
         {exportando === 'csv' ? 'Gerando CSV…' : 'Exportar CSV'}
       </button>
@@ -58,7 +64,7 @@ export default function ExportButtons({ filtros, totalFiltrado }) {
         type="button"
         className="btn btn-outline-gold"
         onClick={() => handleExport('pdf')}
-        disabled={exportando !== null || totalFiltrado === 0}
+        disabled={desabilitado}
       >
         {exportando === 'pdf' ? 'Gerando PDF…' : 'Exportar PDF'}
       </button>
@@ -66,4 +72,3 @@ export default function ExportButtons({ filtros, totalFiltrado }) {
     </div>
   );
 }
-

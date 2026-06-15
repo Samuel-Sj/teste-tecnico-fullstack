@@ -1,11 +1,10 @@
-const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
-
 function formatarData(dataISO) {
+  if (!dataISO) return '—';
   const [ano, mes, dia] = dataISO.split('-');
   return `${dia}/${mes}/${ano}`;
 }
 
-const COLUNAS = ['Cliente', 'Data', 'Horário', 'Advogado(a)', 'Área / órgão', 'Status', 'Valor'];
+const COLUNAS = ['Cliente', 'CPF', 'Data', 'Horário', 'Responsável', 'Organização', 'Status'];
 
 export default function AtendimentosTable({ atendimentos, loading, error }) {
   return (
@@ -14,7 +13,7 @@ export default function AtendimentosTable({ atendimentos, loading, error }) {
         <thead>
           <tr>
             {COLUNAS.map((c) => (
-              <th key={c} style={c === 'Valor' ? { textAlign: 'right' } : undefined}>{c}</th>
+              <th key={c}>{c}</th>
             ))}
           </tr>
         </thead>
@@ -45,18 +44,18 @@ export default function AtendimentosTable({ atendimentos, loading, error }) {
           )}
 
           {!error && !loading && atendimentos.map((a) => (
-            <tr key={a.id}>
-              <td className="cliente-cell">{a.cliente}</td>
+            <tr key={a.codigo}>
+              <td className="cliente-cell">{a.nome}</td>
+              <td className="muted-cell">{a.cpf}</td>
               <td>{formatarData(a.data)}</td>
               <td className="muted-cell">{a.horaInicio} – {a.horaFim}</td>
-              <td>{a.advogado}</td>
-              <td className="muted-cell">{a.areaJuridica}</td>
+              <td>{a.responsavel || '—'}</td>
+              <td className="muted-cell">{a.organizacao || '—'}</td>
               <td>
                 <span className={`status-pill status-pill--${a.status === 'Concluído' ? 'concluido' : 'cancelado'}`}>
-                  {a.status}
+                  {a.status || '—'}
                 </span>
               </td>
-              <td className="valor-cell">{a.valor > 0 ? formatadorMoeda.format(a.valor) : '—'}</td>
             </tr>
           ))}
         </tbody>

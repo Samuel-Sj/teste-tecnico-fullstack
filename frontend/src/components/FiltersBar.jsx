@@ -2,11 +2,11 @@ export default function FiltersBar({ filtros, termoBusca, setTermoBusca, atualiz
   return (
     <div className="filters-bar" role="search" aria-label="Filtros de atendimentos">
       <div className="filter-field filter-field--search">
-        <label htmlFor="busca">Buscar (cliente, advogado ou área)</label>
+        <label htmlFor="busca">Buscar por nome ou CPF</label>
         <input
           id="busca"
           type="text"
-          placeholder="Digite para buscar…"
+          placeholder="Digite o nome ou CPF do cliente…"
           value={termoBusca}
           onChange={(e) => setTermoBusca(e.target.value)}
         />
@@ -23,21 +23,21 @@ export default function FiltersBar({ filtros, termoBusca, setTermoBusca, atualiz
       </div>
 
       <div className="filter-field">
-        <label htmlFor="area">Área / órgão</label>
-        <select id="area" value={filtros.areaJuridica} onChange={(e) => atualizarFiltro('areaJuridica', e.target.value)}>
+        <label htmlFor="organizacao">Organização</label>
+        <select id="organizacao" value={filtros.organizacao} onChange={(e) => atualizarFiltro('organizacao', e.target.value)}>
           <option value="">Todas</option>
-          {opcoesFiltro.areas.map((a) => (
-            <option key={a} value={a}>{a}</option>
+          {opcoesFiltro.organizacoes.map((o) => (
+            <option key={o} value={o}>{o}</option>
           ))}
         </select>
       </div>
 
       <div className="filter-field">
-        <label htmlFor="advogado">Advogado(a)</label>
-        <select id="advogado" value={filtros.advogado} onChange={(e) => atualizarFiltro('advogado', e.target.value)}>
+        <label htmlFor="responsavel">Responsável</label>
+        <select id="responsavel" value={filtros.responsavel} onChange={(e) => atualizarFiltro('responsavel', e.target.value)}>
           <option value="">Todos</option>
-          {opcoesFiltro.advogados.map((a) => (
-            <option key={a} value={a}>{a}</option>
+          {opcoesFiltro.responsaveis.map((r) => (
+            <option key={r} value={r}>{r}</option>
           ))}
         </select>
       </div>

@@ -2,54 +2,56 @@ const convertExceltoJson = require('../data/exceltoJson');
 
 const data = convertExceltoJson();
 
-exports.getUsers = (req,res) => {
-try{    
- 
-   if (!data){
-	return res.status(500).json({message: 'erro ao consultar dados'}
-)
-    let {page = 1, limit = 10} = req.query;
+// 1. Buscar todos os usuários (Paginado)
+exports.getUsers = (req, res) => {
+    try {    
+        if (!data) {
+            return res.status(500).json({ message: 'erro ao consultar dados' });
+        }
 
-    
-    page = parseInt(page);
-    limit = parseInt(limit);
+        let { page = 1, limit = 10 } = req.query;
 
-    const start = (page - 1) * limit;
-    const end = (page * limit); 
+        page = parseInt(page);
+        limit = parseInt(limit);
 
-    const paginated = data.slice(start,end);
+        const start = (page - 1) * limit;
+        const end = (page * limit); 
 
-    res.json({
-        totalItems: data.length,
-        totalPages: Math.ceil(data.length / limit),
-        currentPage: page,
-        data: paginated
-    })
-} catch (err) {return res.status(500).json({message:'erro interno do servidor'})
-}
+        const paginated = data.slice(start, end);
+
+        return res.json({
+            totalItems: data.length,
+            totalPages: Math.ceil(data.length / limit),
+            currentPage: page,
+            data: paginated
+        });
+    } catch (err) {
+        return res.status(500).json({ message: 'erro interno do servidor', error: err.message });
+    }
+}; // <-- Chave de fechamento da função adicionada aqui
+
+// 2. Buscar usuário por CPF
 exports.getUserByCPF = (req, res) => {
-
     const user = data.find((u) => u.cpf == req.params.cpf);
   
     if (!user) {
-      return res.status(404).json({ message: "CPF do clientr não encontrado" });
+        return res.status(404).json({ message: "CPF do cliente não encontrado" });
     }
   
-    res.json(user);
-  };
+    return res.json(user);
+};
 
-
-exports.getUserByName = (req,res) => {
-
-try {
-
-const user = data.find((u) => u.name ==req.params.name);
-if (!user){
-	return res.status(404).json({message:'Nome do cliente não encontrado'})
-
-}
-res.status(200).json(user);
-}
-} catch (err){
-return res.status(500).json({message:'Erro interno do servidor',error: err.message});
-
+// 3. Buscar usuário por Nome
+exports.getUserByName = (req, res) => {
+    try {
+        const user = data.find((u) => u.name == req.params.name);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'Nome do cliente não encontrado' });
+        }
+        
+        return res.status(200).json(user);
+    } catch (err) { // <-- O catch agora está dentro do escopo correto da função
+        return res.status(500).json({ message: 'Erro interno do servidor', error: err.message });
+    }
+}; // <-- Função fechada corretamente aqui

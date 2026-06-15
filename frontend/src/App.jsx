@@ -26,6 +26,7 @@ export default function App() {
     stats,
     statsLoading,
     statsError,
+    todosFiltrados,
   } = useAtendimentos();
 
   return (
@@ -59,7 +60,7 @@ export default function App() {
           <div className="table-section" style={{ marginTop: 16 }}>
             <div className="table-section__header">
               <h3 className="section-title">Resultados</h3>
-              <ExportButtons filtros={filtros} totalFiltrado={pagination.total} />
+              <ExportButtons filtros={filtros} dados={todosFiltrados} carregando={statsLoading} />
             </div>
 
             <AtendimentosTable atendimentos={atendimentos} loading={loading} error={error} />

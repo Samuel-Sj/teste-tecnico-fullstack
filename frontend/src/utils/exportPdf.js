@@ -1,10 +1,10 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 const formatadorData = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
 function formatarData(dataISO) {
+  if (!dataISO) return '—';
   const [ano, mes, dia] = dataISO.split('-');
   return `${dia}/${mes}/${ano}`;
 }
@@ -28,22 +28,21 @@ export function exportarPdf(atendimentos, filtrosResumo, nomeArquivo = 'atendime
   doc.text(`Total de registros: ${atendimentos.length}`, 14, filtrosResumo ? 32 : 27);
 
   const linhas = atendimentos.map((a) => [
-    a.cliente,
+    a.nome,
+    a.cpf,
     formatarData(a.data),
-    `${a.horaInicio} - ${a.horaFim}`,
-    a.advogado,
-    a.areaJuridica,
-    a.status,
-    a.valor > 0 ? formatadorMoeda.format(a.valor) : '-',
+    `${a.horaInicio ?? ''} - ${a.horaFim ?? ''}`,
+    a.responsavel || '-',
+    a.organizacao || '-',
+    a.status || '-',
   ]);
 
   autoTable(doc, {
     startY: filtrosResumo ? 36 : 31,
-    head: [['Cliente', 'Data', 'Horário', 'Advogado(a)', 'Área / órgão', 'Status', 'Valor']],
+    head: [['Cliente', 'CPF', 'Data', 'Horário', 'Responsável', 'Organização', 'Status']],
     body: linhas,
     styles: { fontSize: 8, cellPadding: 2 },
     headStyles: { fillColor: [27, 37, 56] },
-    columnStyles: { 6: { halign: 'right' } },
   });
 
   doc.save(nomeArquivo);
