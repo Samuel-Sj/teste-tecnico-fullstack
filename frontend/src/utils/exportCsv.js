@@ -1,15 +1,22 @@
+// exportCsv.js
+function formatarData(dataBruta) {
+  if (!dataBruta) return '—';
+  const [data] = dataBruta.split(' ');
+  return data;
+}
+
 const COLUNAS = [
-  { chave: 'nome', titulo: 'Cliente' },
+  { chave: 'name', titulo: 'Cliente' },
   { chave: 'cpf', titulo: 'CPF' },
-  { chave: 'data', titulo: 'Data' },
-  { chave: 'horaInicio', titulo: 'Hora início' },
-  { chave: 'horaFim', titulo: 'Hora fim' },
-  { chave: 'responsavel', titulo: 'Responsável' },
-  { chave: 'organizacao', titulo: 'Organização' },
+  { chave: 'dataAppointment', titulo: 'Data' },
+  { chave: 'startTime', titulo: 'Hora início' },
+  { chave: 'endTime', titulo: 'Hora fim' },
+  { chave: 'responsible', titulo: 'Responsável' },
+  { chave: 'organization', titulo: 'Organização' },
   { chave: 'status', titulo: 'Status' },
 ];
 
-function escaparCampoCsv(valor) {
+function falarCampoCsv(valor) {
   const texto = String(valor ?? '');
   if (/[",;\n]/.test(texto)) {
     return `"${texto.replace(/"/g, '""')}"`;
@@ -17,18 +24,19 @@ function escaparCampoCsv(valor) {
   return texto;
 }
 
-/**
- * Gera um arquivo CSV (separado por ponto-e-vírgula, padrão Excel BR) a partir
- * da lista de atendimentos e inicia o download no navegador.
- */
 export function exportarCsv(atendimentos, nomeArquivo = 'atendimentos.csv') {
   const cabecalho = COLUNAS.map((c) => c.titulo).join(';');
   const linhas = atendimentos.map((a) =>
-    COLUNAS.map((c) => escaparCampoCsv(a[c.chave])).join(';')
+    COLUNAS.map((c) => {
+      let valor = a[c.chave];
+      if (c.chave === 'dataAppointment') {
+        valor = formatarData(valor);
+      }
+      return falarCampoCsv(valor);
+    }).join(';')
   );
 
   const conteudo = [cabecalho, ...linhas].join('\r\n');
-  // BOM no início para o Excel reconhecer corretamente os acentos em UTF-8
   const blob = new Blob(['\uFEFF' + conteudo], { type: 'text/csv;charset=utf-8;' });
 
   const url = URL.createObjectURL(blob);

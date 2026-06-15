@@ -11,6 +11,7 @@ function renameColumns(row) {
         organization: row["Organização"],
         service: row["Serviço"],
         local: row["Local"],
+        responsible: row["Responsável pelo agendamento"],
         createdBy: row["Criado por"],
         createdAt: row["Data de criação"],
         updatedBy: row["Atualizado por"],
@@ -19,6 +20,7 @@ function renameColumns(row) {
         status: row["Status"]
     };
 
+    data.dataAppointment = excelSerialToISO(data.dataAppointment);
     data.createdAt = excelSerialToISO(data.createdAt);
     data.updatedAt = excelSerialToISO(data.updatedAt);
 

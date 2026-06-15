@@ -22,9 +22,10 @@ export default function FiltersBar({ filtros, termoBusca, setTermoBusca, atualiz
         </select>
       </div>
 
+      {/* Correção no select de Organização */}
       <div className="filter-field">
         <label htmlFor="organizacao">Organização</label>
-        <select id="organizacao" value={filtros.organizacao} onChange={(e) => atualizarFiltro('organizacao', e.target.value)}>
+        <select id="organizacao" value={filtros.organization} onChange={(e) => atualizarFiltro('organization', e.target.value)}>
           <option value="">Todas</option>
           {opcoesFiltro.organizacoes.map((o) => (
             <option key={o} value={o}>{o}</option>
@@ -32,26 +33,16 @@ export default function FiltersBar({ filtros, termoBusca, setTermoBusca, atualiz
         </select>
       </div>
 
+      {/* Correção no select de Responsável */}
       <div className="filter-field">
         <label htmlFor="responsavel">Responsável</label>
-        <select id="responsavel" value={filtros.responsavel} onChange={(e) => atualizarFiltro('responsavel', e.target.value)}>
+        <select id="responsavel" value={filtros.responsible} onChange={(e) => atualizarFiltro('responsible', e.target.value)}>
           <option value="">Todos</option>
           {opcoesFiltro.responsaveis.map((r) => (
             <option key={r} value={r}>{r}</option>
           ))}
         </select>
       </div>
-
-      <div className="filter-field">
-        <label htmlFor="dataInicio">De</label>
-        <input id="dataInicio" type="date" value={filtros.dataInicio} onChange={(e) => atualizarFiltro('dataInicio', e.target.value)} />
-      </div>
-
-      <div className="filter-field">
-        <label htmlFor="dataFim">Até</label>
-        <input id="dataFim" type="date" value={filtros.dataFim} onChange={(e) => atualizarFiltro('dataFim', e.target.value)} />
-      </div>
-
       <button type="button" className="btn btn-secondary" onClick={limparFiltros} disabled={!filtrosAtivos}>
         Limpar filtros
       </button>

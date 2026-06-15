@@ -1,18 +1,15 @@
+// exportPdf.js
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 const formatadorData = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
-function formatarData(dataISO) {
-  if (!dataISO) return '—';
-  const [ano, mes, dia] = dataISO.split('-');
-  return `${dia}/${mes}/${ano}`;
+function formatarData(dataBruta) {
+  if (!dataBruta) return '—';
+  const [data] = dataBruta.split(' ');
+  return data;
 }
 
-/**
- * Gera um PDF com a listagem atual de atendimentos (respeitando os
- * filtros/busca ativos) e inicia o download.
- */
 export function exportarPdf(atendimentos, filtrosResumo, nomeArquivo = 'atendimentos.pdf') {
   const doc = new jsPDF({ orientation: 'landscape' });
 
@@ -28,12 +25,11 @@ export function exportarPdf(atendimentos, filtrosResumo, nomeArquivo = 'atendime
   doc.text(`Total de registros: ${atendimentos.length}`, 14, filtrosResumo ? 32 : 27);
 
   const linhas = atendimentos.map((a) => [
-    a.nome,
+    a.name,
     a.cpf,
-    formatarData(a.data),
-    `${a.horaInicio ?? ''} - ${a.horaFim ?? ''}`,
-    a.responsavel || '-',
-    a.organizacao || '-',
+    formatarData(a.dataAppointment),
+    a.responsible || '-',
+    a.organization || '-',
     a.status || '-',
   ]);
 

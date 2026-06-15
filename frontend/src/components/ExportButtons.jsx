@@ -1,3 +1,4 @@
+// ExportButtons.jsx
 import { useState } from 'react';
 import { exportarCsv } from '../utils/exportCsv';
 import { exportarPdf } from '../utils/exportPdf';
@@ -5,8 +6,8 @@ import { exportarPdf } from '../utils/exportPdf';
 const LABELS_FILTRO = {
   search: 'nome/CPF',
   status: 'status',
-  organizacao: 'organização',
-  responsavel: 'responsável',
+  organization: 'organização',
+  responsible: 'responsável',
   dataInicio: 'a partir de',
   dataFim: 'até',
 };
@@ -18,12 +19,8 @@ function resumoFiltros(filtros) {
   return partes.length ? partes.join(', ') : 'nenhum (todos os atendimentos)';
 }
 
-/**
- * Exporta exatamente os registros já carregados em `dados`, que
- * correspondem aos filtros/busca ativos no momento (ver useAtendimentos).
- */
 export default function ExportButtons({ filtros, dados, carregando }) {
-  const [exportando, setExportando] = useState(null); // 'csv' | 'pdf' | null
+  const [exportando, setExportando] = useState(null);
   const [erro, setErro] = useState(null);
 
   function handleExport(tipo) {

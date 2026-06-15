@@ -1,7 +1,9 @@
-function formatarData(dataISO) {
-  if (!dataISO) return '—';
-  const [ano, mes, dia] = dataISO.split('-');
-  return `${dia}/${mes}/${ano}`;
+function formatarData(dataBruta) {
+  if (!dataBruta) return '—';
+
+  const [data] = dataBruta.split(' ');
+  
+  return data;
 }
 
 const COLUNAS = ['Cliente', 'CPF', 'Data', 'Horário', 'Responsável', 'Organização', 'Status'];
@@ -45,12 +47,12 @@ export default function AtendimentosTable({ atendimentos, loading, error }) {
 
           {!error && !loading && atendimentos.map((a) => (
             <tr key={a.codigo}>
-              <td className="cliente-cell">{a.nome}</td>
+              <td className="cliente-cell">{a.name}</td>
               <td className="muted-cell">{a.cpf}</td>
-              <td>{formatarData(a.data)}</td>
-              <td className="muted-cell">{a.horaInicio} – {a.horaFim}</td>
-              <td>{a.responsavel || '—'}</td>
-              <td className="muted-cell">{a.organizacao || '—'}</td>
+              <td>{formatarData(a.dataAppointment)}</td>
+              <td className="muted-cell">{a.startTime} – {a.endTime}</td>
+              <td>{a.responsible || '—'}</td>
+              <td className="muted-cell">{a.organization || '—'}</td>
               <td>
                 <span className={`status-pill status-pill--${a.status === 'Concluído' ? 'concluido' : 'cancelado'}`}>
                   {a.status || '—'}
