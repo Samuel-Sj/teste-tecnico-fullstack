@@ -1,4 +1,3 @@
-// ExportButtons.jsx
 import { useState } from 'react';
 import { exportarCsv } from '../utils/exportCsv';
 import { exportarPdf } from '../utils/exportPdf';

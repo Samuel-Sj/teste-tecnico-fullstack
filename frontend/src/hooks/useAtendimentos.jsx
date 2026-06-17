@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { fetchClientes } from '../services/api'; // Importa a função real do seu backend
+import { fetchClientes } from '../services/api';
 
 export const FILTROS_INICIAIS = {
   search: '',
@@ -14,24 +14,16 @@ const LIMIT_PADRAO = 10;
 
 export function useAtendimentos() {
   const [filtros, setFiltros] = useState(FILTROS_INICIAIS);
-  const [termoBusca, setTermoBusca] = useState(''); 
+  const [termoBusca, setTermoBusca] = useState('');
   const [page, setPage] = useState(1);
   const [limit] = useState(LIMIT_PADRAO);
 
-  // Mantemos o nome 'atendimentos' para o componente visual não quebrar,
-  // mas aqui dentro ele vai guardar a lista de Usuários do Excel.
-  const [atendimentos, setAtendimentos] = useState([]);
-  const [pagination, setPagination] = useState({ page: 1, limit: LIMIT_PADRAO, total: 0, totalPages: 0 });
+
+  const [todosAtendimentos, setTodosAtendimentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [todosFiltrados, setTodosFiltrados] = useState([]);
-  const [statsLoading, setStatsLoading] = useState(false);
-  const [statsError, setStatsError] = useState(null);
 
-  const [opcoesFiltro, setOpcoesFiltro] = useState({ status: [], organizacoes: [], responsaveis: [] });
-
-  // Debounce para busca
   const debounceRef = useRef(null);
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -42,50 +34,129 @@ export function useAtendimentos() {
     return () => clearTimeout(debounceRef.current);
   }, [termoBusca]);
 
-  // Função principal que liga o Frontend ao seu userController.js
   const carregarLista = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      // Chama a rota /api/users/names do seu backend
-      const res = await fetchClientes(page, limit);
-      
-      if (res) {
-        // Alimenta o estado com o array 'data' do controller
-        setAtendimentos(res.data);
-        
-        // Mapeia a paginação do seu backend para o formato do hook
-        setPagination({
-          page: res.currentPage,      // veio do backend
-          limit: limit,
-          total: res.totalItems,       // veio do backend
-          totalPages: res.totalPages   // veio do backend
-        });
+      const res = await fetchClientes(1, 999999);
+      if (res && res.data) {
+        setTodosAtendimentos(res.data);
       }
     } catch (err) {
       setError(mensagemDeErro(err));
-      setAtendimentos([]);
+      setTodosAtendimentos([]);
     } finally {
       setLoading(false);
     }
-  }, [page, limit]);
+  }, []);
 
   useEffect(() => {
     carregarLista();
   }, [carregarLista]);
 
-  // Como o backend de usuários não tem gráficos/KPIs, criamos um objeto seguro
-  // para que os cards de "Stats" do painel não quebrem (ficando zerados).
+
+  const dadosFiltrados = useMemo(() => {
+    return todosAtendimentos.filter((item) => {
+      if (filtros.search) {
+        const termo = filtros.search.toLowerCase();
+        const nomeBate = item.name?.toLowerCase().includes(termo);
+        const cpfBate = String(item.cpf || '').includes(termo);
+        const codigoBate = String(item.code || '').toLowerCase().includes(termo);
+
+        if (!nomeBate && !cpfBate && !codigoBate) return false;
+      }
+
+      if (filtros.status && item.status !== filtros.status) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [todosAtendimentos, filtros]);
+
   const stats = useMemo(() => {
+    const total = dadosFiltrados.length;
+
+    const concluidos = dadosFiltrados.filter(i => i.appointmentRealized === 'Sim').length;
+    const cancelados = dadosFiltrados.filter(i => i.appointmentRealized === 'Não').length;
+
+    const totalAvaliados = concluidos + cancelados;
+    const taxaConclusao = totalAvaliados > 0 ? Math.round((concluidos / totalAvaliados) * 100) / 100 : 0;
+
+
+    const statusDistribution = [
+      { status: 'Concluído', total: concluidos },
+      { status: 'Cancelado', total: cancelados }
+    ];
+
+
+    const agrupadoPorMes = dadosFiltrados.reduce((acc, item) => {
+
+      if (!item.dataAppointment) return acc;
+
+      let chaveMes = '';
+
+      if (item.dataAppointment.includes('-')) {
+
+        chaveMes = item.dataAppointment.substring(0, 7);
+      } else if (item.dataAppointment.includes('/')) {
+
+        const partes = item.dataAppointment.split(' ')[0].split('/');
+        if (partes.length === 3) {
+          chaveMes = `${partes[2]}-${partes[1]}`;
+        }
+      }
+
+      if (chaveMes) {
+        acc[chaveMes] = (acc[chaveMes] || 0) + 1;
+      }
+      return acc;
+    }, {});
+
+    const monthlyEvolution = Object.keys(agrupadoPorMes)
+      .sort()
+      .map(mes => ({
+        mes: mes,
+        total: agrupadoPorMes[mes]
+      }));
+
     return {
-      totalAtendimentos: pagination.total, // Mostra o total de usuários do Excel
-      totalConcluidos: 0,
-      totalCancelados: 0,
-      taxaConclusao: 0,
-      statusDistribution: [],
-      monthlyEvolution: [],
+      totalAtendimentos: total,
+      totalConcluidos: concluidos,
+      totalCancelados: cancelados,
+      taxaConclusao: taxaConclusao,
+      statusDistribution: statusDistribution,
+      monthlyEvolution: monthlyEvolution,
     };
-  }, [pagination.total]);
+  }, [dadosFiltrados]);
+
+
+  const atendimentosPaginados = useMemo(() => {
+    const start = (page - 1) * limit;
+    const end = start + limit;
+    return dadosFiltrados.slice(start, end);
+  }, [dadosFiltrados, page, limit]);
+
+
+  const pagination = useMemo(() => {
+    const totalItems = dadosFiltrados.length;
+    return {
+      page: page,
+      limit: limit,
+      total: totalItems,
+      totalPages: Math.ceil(totalItems / limit),
+      totalRealized: stats.totalConcluidos
+    };
+  }, [dadosFiltrados, page, limit, stats.totalConcluidos]);
+
+  const opcoesFiltro = useMemo(() => {
+    const statusSet = new Set(todosAtendimentos.map(i => i.status).filter(Boolean));
+    return {
+      status: Array.from(statusSet),
+      organizacoes: [],
+      responsaveis: []
+    };
+  }, [todosAtendimentos]);
 
   function atualizarFiltro(campo, valor) {
     setFiltros((atual) => ({ ...atual, [campo]: valor }));
@@ -111,17 +182,15 @@ export function useAtendimentos() {
     page,
     setPage,
     limit,
-    atendimentos, // O componente vai ler isso e renderizar as linhas com os Usuários
+    atendimentos: atendimentosPaginados,
     pagination,
     loading,
     error,
     stats,
-    statsLoading,
-    statsError,
-    todosFiltrados,
-    recarregar: () => {
-      carregarLista();
-    },
+    statsLoading: false,
+    statsError: null,
+    todosFiltrados: dadosFiltrados,
+    recarregar: carregarLista,
   };
 }
 

@@ -16,6 +16,7 @@ function renameColumns(row) {
         createdAt: row["Data de criação"],
         updatedBy: row["Atualizado por"],
         updatedAt: row["Data de atualização"],
+        appointmentRealized: row["Agendamento realizado"],
         type: row["Tipo"],
         status: row["Status"]
     };
